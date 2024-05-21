@@ -1,5 +1,7 @@
+using Document.Middleware;
 using Document.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,14 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 
+app.UseCors("MyAllowSpecificOrigins");
+
+app.UseWhen(context => context.Request.Path.ToString().StartsWith("/v1/auth") == false,
+    appBuilder =>
+    {
+        appBuilder.UseMyCustomMiddleware();
+    });
+
 if (app.Environment.IsDevelopment())
 {
     //app.UseSwagger();
@@ -34,5 +44,4 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.MapControllers();
-app.UseCors("MyAllowSpecificOrigins");
 app.Run();

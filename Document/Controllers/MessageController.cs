@@ -17,21 +17,9 @@ public class MessageController : ControllerBase
     [HttpGet("/sent-messages")]
     public async Task<ActionResult<Object>> GetAllSentMessage([FromHeader]long? authUserId)
     {
-        
-        if (authUserId == null)
-        {
-            return BadRequest();
-        }
-
-        var user = await _context.Users.FindAsync(authUserId);
-        if (user == null)
-        {
-            return BadRequest();
-        }
-
-        var recipient = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
+        var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
         var message = new List<Object>();
-        foreach (var k in recipient)
+        foreach (var k in messages)
         {
             var names = await _context.MessageRecipients.Where(x => x.MessageId == k.Id)
                 .Include(x => x.User)
@@ -41,33 +29,27 @@ public class MessageController : ControllerBase
         }
         
         return Ok(message);
-        //return  await _context.Messages.Where(message => message.OwnerId == authUserId).ToListAsync();
     }
 
     [HttpGet]
     public async Task<ActionResult<List<Message>>> GetAllRecipientMessage([FromHeader] long? authUserId)
     {
-        if (authUserId == null)
-        {
-            return BadRequest();
-        }
-
-        var user = await _context.Users.FindAsync(authUserId);
-        if (user == null)
-        {
-            return BadRequest();
-        }
-        
         var listMessages = await _context.MessageRecipients
             .Where(user => user.UserId == authUserId)
             .Include(name => name.Message)
+            .ThenInclude(name => name.Owner)
             .ToListAsync();
         
         var result = new List<Object>();
         
         foreach (var x in listMessages)
         {
-            result.Add(new {x.Message.Name,x.Message.Description,x.Message.PicturePath,  });
+            var names = await _context.MessageRecipients.Where(k => k.MessageId == x.MessageId)
+                .Include(x => x.User)
+                .Select(x => x.User.Name)
+                .ToListAsync();
+            result.Add(new {x.Message.Name,x.Message.Description,x.Message.PicturePath,Owner =  x.Message.Owner.Name, names });
+            
         }
 
         return Ok(result);
@@ -76,17 +58,6 @@ public class MessageController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Message>> CreateMessage( MessageCreate? message, [FromHeader]long? authUserId)
     {
-        if (message == null || authUserId == null || message.RecipientsId == null || message.RecipientsId.Count == 0)
-        {
-            return BadRequest();
-        }
-        
-        var user = await _context.Users.FindAsync(authUserId);
-        if (user == null)
-        {
-            return BadRequest();
-        }
-
         var newMessage = new Message{Name = message.Name,Description = message.Description,PicturePath = message.PicturePath, OwnerId = authUserId.Value};
         await _context.Users.FindAsync(authUserId);
         
@@ -111,19 +82,8 @@ public class MessageController : ControllerBase
     }
 
     [HttpDelete("{messageId}")]
-    public async Task<ActionResult> DeleteMessage(long messageId, [FromHeader]long? authUserId)
+    public async Task<ActionResult> DeleteMessage(long messageId)
     {
-        if (authUserId == null)
-        {
-            return BadRequest();
-        }
-
-        var user = await _context.Users.FindAsync(authUserId);
-        if (user == null)
-        {
-            return BadRequest();
-        }
-
         var message = await _context.Messages.FindAsync(messageId);
         if (message != null) _context.Messages.Remove(message);
         await _context.SaveChangesAsync();

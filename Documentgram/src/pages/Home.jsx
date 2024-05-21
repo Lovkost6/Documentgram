@@ -1,50 +1,28 @@
-﻿import {useState,useEffect} from "react";
+﻿import {useState, useEffect} from "react";
+import {Sending} from './Sending.jsx'
+import {Recipient} from './Recipient.jsx'
+import { useLocalStorage } from './Utils.jsx';
+import {Create} from './Create.jsx';
 
-const tabs = {
-    sending: 1,
-    recipients:2,
-    home:3
-}
-export const Home = ({setAuth,auth}) => {
-    const [message, setMessage] = useState([])
-    const [tab, setTab] = useState(tabs.home)
-    useEffect(() => {
-        sentMessages()
-    }, []);
-    const sentMessages = async () => {
-        const responseMessages = await fetch("https://localhost:44345/sent-messages", {headers : {"Authuserid": auth}})
-            .then(res => res.json())
-        setMessage(responseMessages)
+
+    const tabs = {
+        sending: 1,
+        recipients: 2,
+        home: 3,
+        create: 4
     }
+export const Home = ({setAuth, auth}) => {
+    const [tab, setTab] = useLocalStorage("tab",tabs.home)
     
-    const deleteMessage = async (id) => {
-        const deleteResponse = await fetch(`https://localhost:44345/v1/documents/${id}`,{method:"DELETE",headers : {"Authuserid": auth}})
-        sentMessages()
-    }
-    return(
-        <div>
-            
-        <button onClick={e => setTab(tabs.recipients)}>Полученные</button>
-        <button onClick={e => setTab(tabs.sending)}>Отправленные</button>
-        <button onClick={e => setAuth(null)}>Выйти</button>
-            {
-                tab == tabs.sending ? <div>
-                    {message.map(x =>
-                        <div>
-                            <div>Тема: {x.name}</div>
-                            <div>Сообщение: {x.description}</div>
-                            <div>Вложения: {x.picturePath}</div>
-                            <div>Получатели:</div>
-                            {
-                                x.names.map(k => <div>{k}</div>)
-                            }
-                            <button onClick={e => deleteMessage(x.id)}>Удалить</button>
-                            <div>++++++++++++++++++</div>
-                        </div>
-                    )}
-                </div> : null
-            }
 
+    return (
+        <div>
+
+            <button onClick={e => setTab(tabs.recipients)}>Полученные</button>
+            <button onClick={e => setTab(tabs.sending)}>Отправленные</button>
+            <button onClick={e => setTab(tabs.create)}>Создать сообщение</button>
+            <button onClick={e => setAuth(null)}>Выйти</button>
+            <div>{tab == 1 ? <Sending auth={auth}/> : tab == 2 ? <Recipient auth={auth}/> : tab == 4 ? <Create auth={auth}/> : <div>Home</div>}</div> 
         </div>
     )
 }

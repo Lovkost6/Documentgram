@@ -36,3 +36,4 @@ D:\RiderProjects\Document\Document\obj\Debug\net8.0\refint\Document.dll
 D:\RiderProjects\Document\Document\obj\Debug\net8.0\Document.pdb
 D:\RiderProjects\Document\Document\obj\Debug\net8.0\Document.genruntimeconfig.cache
 D:\RiderProjects\Document\Document\obj\Debug\net8.0\ref\Document.dll
+D:\RiderProjects\Document\Document\obj\Debug\net8.0\Document.sourcelink.json
