@@ -16,13 +16,15 @@ export const Home = ({setAuth, auth}) => {
     
 
     return (
-        <div>
-
-            <button onClick={e => setTab(tabs.recipients)}>Полученные</button>
-            <button onClick={e => setTab(tabs.sending)}>Отправленные</button>
-            <button onClick={e => setTab(tabs.create)}>Создать сообщение</button>
-            <button onClick={e => setAuth(null)}>Выйти</button>
-            <div>{tab == 1 ? <Sending auth={auth}/> : tab == 2 ? <Recipient auth={auth}/> : tab == 4 ? <Create auth={auth}/> : <div>Home</div>}</div> 
+        <div class="container">
+            <nav className="navbar">
+                <button className="nav-button" onClick={e => setTab(tabs.recipients)}>Полученные</button>
+                <button className="nav-button" onClick={e => setTab(tabs.sending)}>Отправленные</button>
+                <button className="nav-button" onClick={e => setTab(tabs.create)}>Создать сообщение</button>
+            </nav>
+                <button className="nav-button logout-button" onClick={e => setAuth(null)}>Выйти</button>
+                <div>{tab == 1 ? <Sending auth={auth}/> : tab == 2 ? <Recipient auth={auth}/> : tab == 4 ?
+                    <Create auth={auth}/> : <div>Home</div>}</div>
         </div>
-    )
+)
 }

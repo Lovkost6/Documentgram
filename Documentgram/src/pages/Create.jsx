@@ -21,28 +21,38 @@ export const Create = ({auth}) => {
     }
 
     return (
-        <form onSubmit={recipientMessages}>
-                <div>Тема:</div>
-                <input value={message.name} onChange={event => setMessage(e => ({...e, name : event.target.value}))}/>
-                
-                <div>Сообщение:</div>
-                <input value={message.description} onChange={event => setMessage(e => ({...e, description : event.target.value}))}/>
-                
-                <div>Вложения:</div>
-                <input value={message?.picturePath} onChange={event => setMessage(e => ({...e, picturePath:event.target.value}))}/>
-                
-                <div>Получатели:</div>
-                <select multiple={true} onChange={event => {
-                    var options = event.target.options;
-                    var value = [];
-                    for (var i = 0, l = options.length; i < l; i++) {
-                        if (options[i].selected) {
-                            value.push(options[i].value);
+        <div class="message-form">
+            <form onSubmit={recipientMessages}>
+                <div className="form-group">
+                    <label>Тема:</label>
+                    <input value={message.name}
+                           onChange={event => setMessage(e => ({...e, name: event.target.value}))}/>
+                </div>
+                <div className="form-group">
+                    <label>Сообщение:</label>
+                    <input value={message.description}
+                           onChange={event => setMessage(e => ({...e, description: event.target.value}))}/>
+                </div>
+                <div className="form-group">
+                    <label>Вложения:</label>
+                    <input value={message?.picturePath}
+                           onChange={event => setMessage(e => ({...e, picturePath: event.target.value}))}/>
+                </div>
+                <div className="form-group">
+                    <label>Получатели:</label>
+                    <select multiple={true} onChange={event => {
+                        var options = event.target.options;
+                        var value = [];
+                        for (var i = 0, l = options.length; i < l; i++) {
+                            if (options[i].selected) {
+                                value.push(options[i].value);
+                            }
                         }
-                    }
-                    setMessage(e => ({...e, recipientsId: value}))
-                }}>{users.map(e => <option key={e.id} value={e.id}>{e.name}</option>)} </select>
-                <button>Отправить</button>
-        </form>
-    )
+                        setMessage(e => ({...e, recipientsId: value}))
+                    }}>{users.map(e => <option key={e.id} value={e.id}>{e.name}</option>)} </select>
+                </div>
+                    <button>Отправить</button>
+            </form>
+        </div>
+)
 }

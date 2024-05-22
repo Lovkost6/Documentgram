@@ -6,7 +6,7 @@ export const Sending = ({auth}) => {
         sentMessages()
     }, []);
     const sentMessages = async () => {
-        const responseMessages = await fetch("https://localhost:44345/sent-messages", {headers: {"Authuserid": auth}})
+        const responseMessages = await fetch("https://localhost:44345/v1/documents/sent-messages", {headers: {"Authuserid": auth}})
             .then(res => res.json())
         setMessage(responseMessages)
     }
@@ -20,18 +20,17 @@ export const Sending = ({auth}) => {
     }
 
     return (
-        <div>
+        <div class="message-form">
             {message.map(x =>
-                <div key={x.id}>
-                    <div>Тема: {x.name}</div>
-                    <div>Сообщение: {x.description}</div>
-                    <div>Вложения: {x.picturePath}</div>
-                    <div>Получатели:</div>
+                <div className="message-item" key={x.id}>
+                    <div  className="form-group"><b>Тема:&nbsp;</b> {x.name}</div>
+                    <div className="form-group"><b>Сообщение:&nbsp;</b> {x.description}</div>
+                    <div className="form-group"><b>Вложения:&nbsp;</b> {x.picturePath}</div>
+                    <div className="form-group"><b>Получатели:&nbsp;</b>
                     {
-                        x.names.map(k => <div key={k}>{k}</div>)
-                    }
+                        x.names.map(k => <div key={k}>{k}&nbsp;</div>)
+                    }</div>
                     <button onClick={e => deleteMessage(x.id)}>Удалить</button>
-                    <div>++++++++++++++++++</div>
                 </div>
             )}
         </div>

@@ -14,7 +14,7 @@ public class MessageController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("/sent-messages")]
+    [HttpGet("sent-messages")]
     public async Task<ActionResult<Object>> GetAllSentMessage([FromHeader]long? authUserId)
     {
         var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
@@ -31,7 +31,7 @@ public class MessageController : ControllerBase
         return Ok(message);
     }
 
-    [HttpGet]
+    [HttpGet("recipient-messages")]
     public async Task<ActionResult<List<Message>>> GetAllRecipientMessage([FromHeader] long? authUserId)
     {
         var listMessages = await _context.MessageRecipients
