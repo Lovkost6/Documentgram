@@ -14,4 +14,6 @@ public class MessageRecipient
     public long UserId { get; set; }
     [ForeignKey("UserId")]
     public User? User { get; set; }
+    
+    public int State { get; set; }
 }

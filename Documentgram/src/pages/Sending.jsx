@@ -1,5 +1,5 @@
 ﻿import {useEffect, useState} from "react";
-
+const stateArr = ["Не рассмотрен","Согласован", "Отклонен"]
 export const Sending = ({auth}) => {
     const [message, setMessage] = useState([])
     useEffect(() => {
@@ -25,10 +25,11 @@ export const Sending = ({auth}) => {
                 <div className="message-item" key={x.id}>
                     <div  className="form-group"><b>Тема:&nbsp;</b> {x.name}</div>
                     <div className="form-group"><b>Сообщение:&nbsp;</b> {x.description}</div>
-                    <div className="form-group"><b>Вложения:&nbsp;</b> {x.picturePath}</div>
+                    <div className="form-group"><b>Вложения:&nbsp;</b> </div>
+                    <img  src={x.file}/>
                     <div className="form-group"><b>Получатели:&nbsp;</b>
                     {
-                        x.names.map(k => <div key={k}>{k}&nbsp;</div>)
+                        x.names.map(k => <div key={k}>{k.name + " " + stateArr[k.state]}&nbsp;</div>)
                     }</div>
                     <button onClick={e => deleteMessage(x.id)}>Удалить</button>
                 </div>
