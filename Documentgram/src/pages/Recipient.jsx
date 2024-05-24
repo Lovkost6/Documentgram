@@ -1,22 +1,23 @@
 ﻿import {useEffect, useState} from "react";
 
 
-export const Recipient = ({auth}) => {
+export const Recipient = () => {
     const [message, setMessage] = useState([])
     useEffect(() => {
         recipientMessages()
     }, []);
     const recipientMessages = async () => {
-        const responseMessages = await fetch("https://localhost:44345/v1/documents/recipient-messages", {headers: {"Authuserid": auth}})
+        const responseMessages = await fetch("https://localhost:44345/v1/documents/recipient-messages", {withCredentials: true,
+            credentials: 'include'},)
             .then(res => res.json())
         setMessage(responseMessages)
     }
     const changeState = async (messageId,stateId) => {
-        const state = await fetch("https://localhost:44345/v1/documents",{headers: {"Authuserid": auth,"Content-Type": "application/json"},method : "PATCH", body: JSON.stringify({Id: messageId,State:stateId})})
+        const state = await fetch("https://localhost:44345/v1/documents",{headers: {"Content-Type": "application/json"},method : "PATCH", body: JSON.stringify({Id: messageId,State:stateId})})
         console.log(messageId,stateId)
     }
     return (
-        <div class="message-form">
+        <div className="message-form">
             {message.map((x,id) =>
                 <div className="message-item" key={id}>
                     <div className="form-group"><b>Тема:&nbsp; </b> {x.name}</div>

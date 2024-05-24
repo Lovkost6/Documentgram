@@ -14,12 +14,19 @@ public class AuthMiddleware
     }
     public async Task Invoke(HttpContext context, ApplicationContext dbContext)
     {
-        var auth = context.Request.Headers["AuthUserId"].ToString();
-        if (auth == String.Empty)
+        if (!context.Request.Cookies.ContainsKey("AuthUserId"))
         {
             context.Response.StatusCode = 400;
             await context.Response.WriteAsync("Авторизуйся");
         }
+
+        //context.Request.Headers["AuthUserId"].ToString();
+        var auth = context.Request.Cookies["AuthUserId"];
+        /*if (auth == String.Empty)
+        {
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsync("Авторизуйся");
+        }*/
         var user = await dbContext.Users.FindAsync(Convert.ToInt64(auth) );
         if (user == null)
         {

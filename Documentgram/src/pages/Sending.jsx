@@ -1,26 +1,26 @@
 ﻿import {useEffect, useState} from "react";
 const stateArr = ["Не рассмотрен","Согласован", "Отклонен"]
-export const Sending = ({auth}) => {
+export const Sending = () => {
     const [message, setMessage] = useState([])
     useEffect(() => {
         sentMessages()
     }, []);
     const sentMessages = async () => {
-        const responseMessages = await fetch("https://localhost:44345/v1/documents/sent-messages", {headers: {"Authuserid": auth}})
+        const responseMessages = await fetch("https://localhost:44345/v1/documents/sent-messages", {withCredentials: true,
+            credentials: 'include'})
             .then(res => res.json())
         setMessage(responseMessages)
     }
 
     const deleteMessage = async (id) => {
         const deleteResponse = await fetch(`https://localhost:44345/v1/documents/${id}`, {
-            method: "DELETE",
-            headers: {"Authuserid": auth}
+            method: "DELETE"
         })
         sentMessages()
     }
 
     return (
-        <div class="message-form">
+        <div className="message-form">
             {message.map(x =>
                 <div className="message-item" key={x.id}>
                     <div  className="form-group"><b>Тема:&nbsp;</b> {x.name}</div>
@@ -29,7 +29,7 @@ export const Sending = ({auth}) => {
                     <img  src={x.file}/>
                     <div className="form-group"><b>Получатели:&nbsp;</b>
                     {
-                        x.names.map(k => <div key={k}>{k.name + " " + stateArr[k.state]}&nbsp;</div>)
+                        x.names.map((k,id) => <div key={id}>{k.name + " " + stateArr[k.state]}&nbsp;</div>)
                     }</div>
                     <button onClick={e => deleteMessage(x.id)}>Удалить</button>
                 </div>
