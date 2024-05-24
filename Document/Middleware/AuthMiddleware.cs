@@ -1,6 +1,4 @@
 ﻿using Document.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Document.Middleware;
 

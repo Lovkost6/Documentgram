@@ -1,6 +1,8 @@
-﻿using Document.Models;
+﻿using Document.HubConf;
+using Document.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Document.Controllers;
@@ -11,10 +13,11 @@ namespace Document.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly ApplicationContext _context;
-
-    public MessageController(ApplicationContext context)
+    private IHubContext<MessageHub> _chatHubContext;
+    public MessageController(ApplicationContext context, IHubContext<MessageHub> chatHubContext)
     {
         _context = context;
+        _chatHubContext = chatHubContext;
     }
     
     
@@ -79,7 +82,7 @@ public class MessageController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Message>> CreateMessage([FromForm] MessageCreate? message)
     {
-        var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault().Value);
+        var authUserId = Convert.ToInt64(User.Claims.FirstOrDefault().Value);
         string? path = null;
         if (message.PicturePath != null)
         {
@@ -91,6 +94,7 @@ public class MessageController : ControllerBase
                 await message.PicturePath.CopyToAsync(fileStream);
             }
         }
+        
 
         var newMessage = new Message
         {
@@ -116,6 +120,10 @@ public class MessageController : ControllerBase
             .Select(name => name.User.Name)
             .ToListAsync();
 
+        _chatHubContext.Clients.Users(message.RecipientsId
+                .Select(x => x.ToString()))
+            .SendAsync("SendRecipients", $"{newMessage.Owner.Name} прислал вам сообщенние: {message.Name}");
+        
         return Ok(new
         {
             newMessage.Name, newMessage.Description, newMessage.PicturePath, OwnerName = newMessage.Owner.Name,
