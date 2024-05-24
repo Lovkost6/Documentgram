@@ -1,9 +1,11 @@
 ﻿using Document.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Document.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("v1/documents")]
 public class MessageController : ControllerBase
@@ -14,10 +16,11 @@ public class MessageController : ControllerBase
     {
         _context = context;
     }
-
+    
     [HttpGet("sent-messages")]
-    public async Task<ActionResult<Object>> GetAllSentMessage([FromHeader] long? authUserId)
+    public async Task<ActionResult<Object>> GetAllSentMessage()
     {
+        var authUserId = Convert.ToInt32(User.Claims.FirstOrDefault().Value);
         var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
         var message = new List<Object>();
 
@@ -41,8 +44,9 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet("recipient-messages")]
-    public async Task<ActionResult<List<Message>>> GetAllRecipientMessage([FromHeader] long? authUserId)
+    public async Task<ActionResult<List<Message>>> GetAllRecipientMessage()
     {
+        var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault().Value);
         var listMessages = await _context.MessageRecipients
             .Where(user => user.UserId == authUserId)
             .Include(name => name.Message)
@@ -72,15 +76,9 @@ public class MessageController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Message>> CreateMessage([FromForm] MessageCreate? message,
-        [FromHeader] long? authUserId)
+    public async Task<ActionResult<Message>> CreateMessage([FromForm] MessageCreate? message)
     {
-        /*if (message.PicturePath != "")
-        {
-            var bytes = System.IO.File.ReadAllBytes(message.PicturePath);
-            string file = Convert.ToBase64String(bytes);
-            message.PicturePath = "data:image/png;base64, " + file;
-        }*/
+        var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault().Value);
         string? path = null;
         if (message.PicturePath != null)
         {
@@ -95,7 +93,7 @@ public class MessageController : ControllerBase
 
         var newMessage = new Message
         {
-            Name = message.Name, Description = message.Description, PicturePath = path, OwnerId = authUserId.Value
+            Name = message.Name, Description = message.Description, PicturePath = path, OwnerId = authUserId
         };
         await _context.Users.FindAsync(authUserId);
 
@@ -134,8 +132,9 @@ public class MessageController : ControllerBase
     }
 
     [HttpPatch]
-    public async Task<ActionResult> ChangeState(MessageStateUpdate messageStateUpdate, [FromHeader] long authUserId)
+    public async Task<ActionResult> ChangeState(MessageStateUpdate messageStateUpdate)
     {
+        var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault().Value);
         var messageRecipients =  await _context.MessageRecipients
             .Where(x => x.MessageId == messageStateUpdate.Id && x.UserId == authUserId).FirstOrDefaultAsync();
         messageRecipients.State = (int)messageStateUpdate.State;

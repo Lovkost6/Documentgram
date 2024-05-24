@@ -1,15 +1,14 @@
 ﻿import {useState} from "react";
-
+import Cookies from 'js-cookie'
 export const SignIn = ({setAuth}) => {
     const [login, setLogin] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState('') 
+    const [error, setError] = useState('')
     async function  getAuthData(event){
         event.preventDefault()
-        const response = await fetch(`https://localhost:44345/v1/auth?login=${login}&password=${password}`)
-        
-        const header = response.headers.get("Authuserid")
-        header == null? setError('Пользователь не найден'):setAuth(header)
+        const response = await fetch(`https://localhost:44345/v1/auth?login=${login}&password=${password}`,{method: "GET" ,withCredentials: true,
+            credentials: 'include', headers : {'Access-Control-Allow-Origin': '*'}})
+        response.status == 200? setAuth(true) : setError("Нет такого пользователя")
     }
     
     return(
