@@ -37,3 +37,11 @@ D:\RiderProjects\Document\Document\obj\Debug\net8.0\Document.pdb
 D:\RiderProjects\Document\Document\obj\Debug\net8.0\Document.genruntimeconfig.cache
 D:\RiderProjects\Document\Document\obj\Debug\net8.0\ref\Document.dll
 D:\RiderProjects\Document\Document\obj\Debug\net8.0\Document.sourcelink.json
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\RiderProjects\Document\Document\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

@@ -17,6 +17,7 @@ public class MessageController : ControllerBase
         _context = context;
     }
     
+    
     [HttpGet("sent-messages")]
     public async Task<ActionResult<Object>> GetAllSentMessage()
     {

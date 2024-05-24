@@ -1,10 +1,13 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Document.Models;
+using Document.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Document.Controllers;
 
@@ -41,7 +44,7 @@ public class AuthController : ControllerBase
             return NotFound();
         }
         
-        var claims = new List<Claim>
+        /*var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Sid, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Name)
@@ -62,15 +65,26 @@ public class AuthController : ControllerBase
 
             IssuedUtc = DateTimeOffset.Now,
             // The time at which the authentication ticket was issued.
-
         };
         
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme, 
             new ClaimsPrincipal(claimsIdentity), 
-            authProperties);
+            authProperties);*/
         
-        
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Sid, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Name)
+        };
+        // создаем JWT-токен
+        var jwt = new JwtSecurityToken(
+            issuer: AuthOptions.ISSUER,
+            audience: AuthOptions.AUDIENCE,
+            claims: claims,
+            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)),
+            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+        return Ok(new JwtSecurityTokenHandler().WriteToken(jwt));
         
         //Response.Headers.Append("AuthUserId", user.Id.ToString());
         //Response.Cookies.Append("AuthUserId",user.Id.ToString());
