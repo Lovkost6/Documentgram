@@ -28,7 +28,8 @@ public class MessageController : ControllerBase
     public async Task<ActionResult<Object>> GetAllSentMessage(int page = 1, int size = 10)
     {
         var authUserId = Convert.ToInt32(User.Claims.FirstOrDefault().Value);
-        cache.TryGetValue(authUserId, out List<object>? sentMessages);
+        var cacheKey = new {method = "sent-messages",authUserId = authUserId, skip = (page - 1) * size, size = size};
+        cache.TryGetValue(cacheKey, out List<object>? sentMessages);
         
         if (sentMessages != null)
         {
@@ -60,7 +61,7 @@ public class MessageController : ControllerBase
             Priority = 0,
         };
         
-        cache.Set(authUserId, message, cacheOptions);
+        cache.Set(cacheKey, message, cacheOptions);
         var paginatedMessage = message.Skip((page - 1) * size).Take(size).ToList();
         return Ok(paginatedMessage);
     }
@@ -69,8 +70,8 @@ public class MessageController : ControllerBase
     public async Task<ActionResult<object>?> GetAllRecipientMessage(int page = 1, int size = 10)
     {
         var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault()?.Value);
-
-        cache.TryGetValue(authUserId, out List<object>? messageRecipients);
+        var cacheKey = new {method = "recipient-messages",authUserId = authUserId, skip = (page - 1) * size, size = size};
+        cache.TryGetValue(cacheKey, out List<object>? messageRecipients);
         
         if (messageRecipients != null)
         {
@@ -112,8 +113,8 @@ public class MessageController : ControllerBase
             Priority = 0,
         };
         
-        cache.Set(authUserId, result, cacheOptions);
         var paginationResult = result.Skip((page - 1)*size).Take(size).ToList();
+        cache.Set(cacheKey, paginationResult, cacheOptions);
         return Ok(paginationResult);
     }
 
