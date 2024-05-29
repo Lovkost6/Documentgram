@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Document.Controllers;
 
@@ -14,10 +15,12 @@ public class MessageController : ControllerBase
 {
     private readonly ApplicationContext _context;
     private IHubContext<MessageHub> _chatHubContext;
-    public MessageController(ApplicationContext context, IHubContext<MessageHub> chatHubContext)
+    private IMemoryCache cache;
+    public MessageController(ApplicationContext context, IHubContext<MessageHub> chatHubContext, IMemoryCache cache)
     {
         _context = context;
         _chatHubContext = chatHubContext;
+        this.cache = cache;
     }
     
     
@@ -48,9 +51,18 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet("recipient-messages")]
-    public async Task<ActionResult<List<Message>>> GetAllRecipientMessage()
+    public async Task<ActionResult<object>?> GetAllRecipientMessage()
     {
-        var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault().Value);
+        var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault()?.Value);
+
+        cache.TryGetValue(authUserId, out object? messageRecipients);
+        
+        if (messageRecipients != null)
+        {
+            return messageRecipients;
+        } 
+        
+        
         var listMessages = await _context.MessageRecipients
             .Where(user => user.UserId == authUserId)
             .Include(name => name.Message)
@@ -71,11 +83,22 @@ public class MessageController : ControllerBase
                 var bytes = System.IO.File.ReadAllBytes("D:\\RiderProjects\\Document\\Document" + x.Message.PicturePath);
                 file = "data:image/png;base64, " + Convert.ToBase64String(bytes);
             }
-
+            
+            
             result.Add(new
                 { x.MessageId,x.Message.Name, x.Message.Description, file, Owner = x.Message.Owner.Name, names });
         }
+        
+        var cacheOptions = new MemoryCacheEntryOptions()
+        {
+            // кэширование в течение 1 минуты
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
+            // низкий приоритет
+            Priority = 0,
+        };
 
+        cache.Set(authUserId, result, cacheOptions);
+        
         return Ok(result);
     }
 

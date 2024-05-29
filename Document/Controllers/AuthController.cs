@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<long>> SignIn(string login,string password)
     {
-        var user = await _context.Users.Where(l => l.Login == login && l.Password == password).FirstOrDefaultAsync();
+            var user = await _context.Users.Where(l => l.Login == login && l.Password == password).FirstOrDefaultAsync();
         
         if (user == null)
         {
