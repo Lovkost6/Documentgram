@@ -28,13 +28,14 @@ public class MessageController : ControllerBase
     public async Task<ActionResult<Object>> GetAllSentMessage(int page = 1, int size = 10)
     {
         var authUserId = Convert.ToInt32(User.Claims.FirstOrDefault().Value);
-        cache.TryGetValue(authUserId, out List<object>? sentMessages);
+        var cacheKey = new {method = "sent-messages",authUserId = authUserId, skip = (page - 1) * size, size = size};
+        cache.TryGetValue(cacheKey, out List<object>? sentMessages);
         
         if (sentMessages != null)
         {
-            return sentMessages.Skip((page - 1)*size).Take(size).ToList();
+            return sentMessages;
         } 
-        var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
+        var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).Skip((page - 1) * size).Take(size).ToListAsync();
         var message = new List<Object>();
 
         foreach (var k in messages)
@@ -60,21 +61,21 @@ public class MessageController : ControllerBase
             Priority = 0,
         };
         
-        cache.Set(authUserId, message, cacheOptions);
-        var paginatedMessage = message.Skip((page - 1) * size).Take(size).ToList();
-        return Ok(paginatedMessage);
+        cache.Set(cacheKey, message, cacheOptions);
+        //var paginatedMessage = message.Skip((page - 1) * size).Take(size).ToList();
+        return Ok(message);
     }
 
     [HttpGet("recipient-messages")]
     public async Task<ActionResult<object>?> GetAllRecipientMessage(int page = 1, int size = 10)
     {
         var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault()?.Value);
-
-        cache.TryGetValue(authUserId, out List<object>? messageRecipients);
+        var cacheKey = new {method = "recipient-messages",authUserId = authUserId, skip = (page - 1) * size, size = size};
+        cache.TryGetValue(cacheKey, out List<object>? messageRecipients);
         
         if (messageRecipients != null)
         {
-            return messageRecipients.Skip((page - 1)*size).Take(size).ToList();
+            return messageRecipients;
         } 
         
         
@@ -82,7 +83,7 @@ public class MessageController : ControllerBase
             .Where(user => user.UserId == authUserId)
             .Include(name => name.Message)
             .ThenInclude(name => name.Owner)
-            .ToListAsync();
+            .Skip((page - 1)*size).Take(size).ToListAsync();
 
         var result = new List<Object>();
 
@@ -112,8 +113,8 @@ public class MessageController : ControllerBase
             Priority = 0,
         };
         
-        cache.Set(authUserId, result, cacheOptions);
         var paginationResult = result.Skip((page - 1)*size).Take(size).ToList();
+        cache.Set(cacheKey, paginationResult, cacheOptions);
         return Ok(paginationResult);
     }
 
