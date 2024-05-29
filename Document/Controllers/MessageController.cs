@@ -25,9 +25,15 @@ public class MessageController : ControllerBase
     
     
     [HttpGet("sent-messages")]
-    public async Task<ActionResult<Object>> GetAllSentMessage()
+    public async Task<ActionResult<Object>> GetAllSentMessage(int page = 1, int size = 10)
     {
         var authUserId = Convert.ToInt32(User.Claims.FirstOrDefault().Value);
+        cache.TryGetValue(authUserId, out List<object>? sentMessages);
+        
+        if (sentMessages != null)
+        {
+            return sentMessages.Skip((page - 1)*size).Take(size).ToList();
+        } 
         var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
         var message = new List<Object>();
 
@@ -46,20 +52,29 @@ public class MessageController : ControllerBase
 
             message.Add(new { k.Id, k.Name, k.Description, file, names });
         }
-
-        return Ok(message);
+        var cacheOptions = new MemoryCacheEntryOptions()
+        {
+            // кэширование в течение 1 минуты
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
+            // низкий приоритет
+            Priority = 0,
+        };
+        
+        cache.Set(authUserId, message, cacheOptions);
+        var paginatedMessage = message.Skip((page - 1) * size).Take(size).ToList();
+        return Ok(paginatedMessage);
     }
 
     [HttpGet("recipient-messages")]
-    public async Task<ActionResult<object>?> GetAllRecipientMessage()
+    public async Task<ActionResult<object>?> GetAllRecipientMessage(int page = 1, int size = 10)
     {
         var authUserId = Convert.ToInt32( User.Claims.FirstOrDefault()?.Value);
 
-        cache.TryGetValue(authUserId, out object? messageRecipients);
+        cache.TryGetValue(authUserId, out List<object>? messageRecipients);
         
         if (messageRecipients != null)
         {
-            return messageRecipients;
+            return messageRecipients.Skip((page - 1)*size).Take(size).ToList();
         } 
         
         
@@ -96,10 +111,10 @@ public class MessageController : ControllerBase
             // низкий приоритет
             Priority = 0,
         };
-
-        cache.Set(authUserId, result, cacheOptions);
         
-        return Ok(result);
+        cache.Set(authUserId, result, cacheOptions);
+        var paginationResult = result.Skip((page - 1)*size).Take(size).ToList();
+        return Ok(paginationResult);
     }
 
     [HttpPost]
