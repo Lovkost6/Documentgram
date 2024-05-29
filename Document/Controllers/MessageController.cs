@@ -33,9 +33,9 @@ public class MessageController : ControllerBase
         
         if (sentMessages != null)
         {
-            return sentMessages.Skip((page - 1)*size).Take(size).ToList();
+            return sentMessages;
         } 
-        var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).ToListAsync();
+        var messages = await _context.Messages.Where(x => x.OwnerId == authUserId).Skip((page - 1) * size).Take(size).ToListAsync();
         var message = new List<Object>();
 
         foreach (var k in messages)
@@ -62,8 +62,8 @@ public class MessageController : ControllerBase
         };
         
         cache.Set(cacheKey, message, cacheOptions);
-        var paginatedMessage = message.Skip((page - 1) * size).Take(size).ToList();
-        return Ok(paginatedMessage);
+        //var paginatedMessage = message.Skip((page - 1) * size).Take(size).ToList();
+        return Ok(message);
     }
 
     [HttpGet("recipient-messages")]
@@ -75,7 +75,7 @@ public class MessageController : ControllerBase
         
         if (messageRecipients != null)
         {
-            return messageRecipients.Skip((page - 1)*size).Take(size).ToList();
+            return messageRecipients;
         } 
         
         
@@ -83,7 +83,7 @@ public class MessageController : ControllerBase
             .Where(user => user.UserId == authUserId)
             .Include(name => name.Message)
             .ThenInclude(name => name.Owner)
-            .ToListAsync();
+            .Skip((page - 1)*size).Take(size).ToListAsync();
 
         var result = new List<Object>();
 
