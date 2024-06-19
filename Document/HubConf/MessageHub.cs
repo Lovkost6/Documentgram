@@ -7,7 +7,7 @@ namespace Document.HubConf;
 [Authorize]
 public class MessageHub : Hub
 {
-    public async Task SendRecipients(List<string> usersId  ,string message)
+    public async Task Sencipients(List<string> usersId  ,string message)
     {
         //Clients.Users(usersId).SendAsync("SendRecipients",message);
     }

@@ -4,7 +4,8 @@ import {Recipient} from './Recipient.jsx'
 import { useLocalStorage } from './Utils.jsx';
 import {Create} from './Create.jsx';
 import Cookies from 'js-cookie'
-
+import {resetToken,$token} from "../Storage/Token.js"
+import {useUnit} from "effector-react";
 
     const tabs = {
         sending: 1,
@@ -14,11 +15,13 @@ import Cookies from 'js-cookie'
     }
 export const Home = ({removeAuth}) => {
     const [tab, setTab] = useLocalStorage("tab",tabs.home)
+    const token = useUnit($token)
     
 const  logout = async () =>{
     const responseMessages = await fetch("https://localhost:44345/v1/auth/logout", {withCredentials: true,
         credentials: 'include'})
     removeAuth(false)
+    resetToken()
 }
     
     return (
