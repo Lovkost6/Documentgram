@@ -1,21 +1,31 @@
 ﻿import {useEffect, useState} from "react";
 const stateArr = ["Не рассмотрен","Согласован", "Отклонен"]
+import {useUnit} from "effector-react";
+import {$token} from "../Storage/Token.js"
 export const Sending = () => {
     const [message, setMessage] = useState([])
+    const token = useUnit($token)
     useEffect(() => {
         sentMessages()
     }, []);
     const sentMessages = async () => {
-        const responseMessages = await fetch("https://localhost:44345/v1/documents/sent-messages", {withCredentials: true,
-            credentials: 'include'})
+        const responseMessages = await fetch("https://localhost:44345/v1/documents/sent-messages", 
+            {
+                withCredentials: true,
+                credentials: 'include',
+                headers: {
+                    "Authorization" : `Bearer ${token}`,
+                }})
             .then(res => res.json())
         setMessage(responseMessages)
     }
 
     const deleteMessage = async (id) => {
         const deleteResponse = await fetch(`https://localhost:44345/v1/documents/${id}`, {
-            method: "DELETE"
-        })
+            method: "DELETE",
+            headers: {
+                "Authorization" : `Bearer ${token.value}`,
+            }})
         sentMessages()
     }
 

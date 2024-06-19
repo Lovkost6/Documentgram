@@ -85,7 +85,7 @@ builder.Services.AddAuthorization(options => options.DefaultPolicy =
 
 var app = builder.Build();
 
-app.UseCors("AllowSpecificOrigin");
+    app.UseCors("AllowSpecificOrigin");
 
 /*app.UseWhen(context => context.Request.Path.ToString().StartsWith("/v1/auth") == false,
     appBuilder =>

@@ -1,11 +1,14 @@
 ﻿import { useState, useEffect} from "react";
+import {$token} from "../Storage/Token.js";
+import {useUnit} from "effector-react";
 
 export const Create = ({auth}) => {
     const [message, setMessage] = useState({name:"",description:"",picturePath:"", recipientsId:[]})
     const [users, setUsers] = useState([])
+    const token = useUnit($token)
     const recipientMessages = async (e) => {
         e.preventDefault()
-        const responseMessages = await fetch("https://localhost:44345/v1/documents", {method: "POST",headers: {"Authuserid": auth,"Content-Type": "application/json"}, body: JSON.stringify(message)})
+        const responseMessages = await fetch("https://localhost:44345/v1/documents", {method: "POST",headers: {"Authuserid": auth,"Content-Type": "application/json","Authorization" : `Bearer ${token}`}, body: JSON.stringify(message)})
         console.log(responseMessages)
           //  .then(res => res.json())
         //setMessage(responseMessages)
@@ -15,7 +18,7 @@ export const Create = ({auth}) => {
     }, []);
     
     const getAllUser = async () => {
-        const users = await  fetch("https://localhost:44345/v1/users" , {headers: {"Authuserid": auth}})
+        const users = await  fetch("https://localhost:44345/v1/users" , {headers: {"Authuserid": auth,"Authorization" : `Bearer ${token}`}})
             .then(res => res.json())
         setUsers(users)
     }
